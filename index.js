@@ -2,12 +2,15 @@ import { createServer } from "node:http";
 import { WebSocketServer } from "ws";
 import { Chess } from "chess.js";
 import { v6 as uuidv6 } from "uuid";
+// TODO: implement automated testing
 
 class Game {
   constructor(id) {
     this.id = id;
-    this.chess = new Chess();
+    // this.chess = new Chess();
+    this.moves = []; // Provisory
     this.hasStarted = false;
+    this.players = [];
   }
 }
 
@@ -26,11 +29,9 @@ const httpServer = createServer((req, res) => {
 wss.on("connection", (ws) => {
   ws.on("error", console.error);
 
-  // console.log(wss.clients); // TODO: Make max clients 2
-
   ws.on("message", (data) => {
-    const [gameId, move] = data.toString("utf-8").split(" ");
-    if (!gameId || !move) {
+    const [gameId, command, move] = data.toString("utf-8").split(" ");
+    if (!gameId || !command) {
       console.error("Invalid message format");
       ws.send("Error: Invalid message format");
       return;
@@ -40,8 +41,19 @@ wss.on("connection", (ws) => {
       ws.send("Error: Game not found");
       return;
     }
+    const game = currentGames.get(gameId);
 
-    wss.clients.forEach((socket) => socket.send(`Moved ${move} in ${gameId}`));
+    if (command === "join" && game.players.length < 2) {
+      game.players.push(ws);
+    }
+    if (command === "move" && game.players.includes(ws)) {
+      // TODO: Avoid moves from players who are not in the game (Check if this method is proper)
+      game.moves.push(move);
+    }
+
+    console.log("game.players.length:", game.players.length);
+    console.log("game.moves:", game.moves);
+    game.players.forEach((socket) => socket.send(game.moves));
   });
 });
 
