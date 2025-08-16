@@ -19,7 +19,10 @@ const wss = new WebSocketServer({ port: 3001, clientTracking: true }); // TODO: 
 let currentGames = new Map();
 
 const httpServer = createServer((req, res) => {
-  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.writeHead(200, {
+    "Content-Type": "text/plain",
+    "Access-Control-Allow-Origin": "http://localhost:5173",
+  });
   const gameId = uuidv6();
   const game = new Game(gameId);
   currentGames.set(gameId, game);
@@ -31,6 +34,7 @@ wss.on("connection", (ws) => {
   ws.on("error", console.error);
 
   ws.on("message", (data) => {
+    console.log(data.toString("utf-8"));
     const [gameId, command, move] = data.toString("utf-8").split(" ");
     if (!gameId || !command) {
       console.error("Invalid message format");
@@ -61,9 +65,6 @@ wss.on("connection", (ws) => {
         console.error(err);
       }
     }
-
-    console.log(game.id);
-    console.log(game.chess.ascii());
   });
 });
 
