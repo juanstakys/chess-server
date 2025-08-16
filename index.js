@@ -7,8 +7,7 @@ import { v6 as uuidv6 } from "uuid";
 class Game {
   constructor(id) {
     this.id = id;
-    // this.chess = new Chess();
-    this.moves = []; // Provisory
+    this.chess = new Chess();
     this.hasStarted = false;
     this.players = [];
   }
@@ -23,6 +22,7 @@ const httpServer = createServer((req, res) => {
   const gameId = uuidv6();
   const game = new Game(gameId);
   currentGames.set(gameId, game);
+  console.log("Created game ID: " + gameId);
   res.end(gameId);
 });
 
@@ -48,12 +48,16 @@ wss.on("connection", (ws) => {
     }
     if (command === "move" && game.players.includes(ws)) {
       // TODO: Avoid moves from players who are not in the game (Check if this method is proper)
-      game.moves.push(move);
+      try {
+        game.chess.move(move);
+        game.players.forEach((socket) => socket.send(move));
+      } catch (err) {
+        console.error(err);
+      }
     }
 
-    console.log("game.players.length:", game.players.length);
-    console.log("game.moves:", game.moves);
-    game.players.forEach((socket) => socket.send(game.moves));
+    console.log(game.id);
+    console.log(game.chess.ascii());
   });
 });
 
