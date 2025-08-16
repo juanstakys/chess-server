@@ -10,6 +10,7 @@ class Game {
     this.chess = new Chess();
     this.hasStarted = false;
     this.players = [];
+    this.turn = 0;
   }
 }
 
@@ -47,10 +48,15 @@ wss.on("connection", (ws) => {
       game.players.push(ws);
     }
     if (command === "move" && game.players.includes(ws)) {
-      // TODO: Avoid moves from players who are not in the game (Check if this method is proper)
+      if (game.turn !== game.players.indexOf(ws)) {
+        console.error("Not your turn");
+        ws.send("Error: Not your turn");
+        return;
+      }
       try {
-        game.chess.move(move);
+        game.chess.move(move); // TODO: make this whole step atomic.
         game.players.forEach((socket) => socket.send(move));
+        game.turn = (game.turn + 1) % 2;
       } catch (err) {
         console.error(err);
       }
