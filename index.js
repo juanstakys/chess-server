@@ -15,7 +15,10 @@ class Game {
   }
 }
 
-const wss = new WebSocketServer({ port: 3001, clientTracking: true }); // TODO: Unhardcode
+const wss = new WebSocketServer({
+  port: 3001,
+  clientTracking: true,
+}); // TODO: Unhardcode
 
 let currentGames = new Map();
 
@@ -68,8 +71,9 @@ wss.on("connection", (ws) => {
       }
       try {
         game.chess.move(move); // TODO: make this whole step atomic.
-        game.players.forEach((socket) => socket.send(move));
-        game.turn = (game.turn + 1) % 2;
+        const nextTurn = (game.turn + 1) % 2;
+        game.players[nextTurn].send(move);
+        game.turn = nextTurn;
       } catch (err) {
         console.error(err);
       }
