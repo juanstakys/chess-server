@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { WebSocketServer } from "ws";
 import { Chess } from "chess.js";
 import { humanId } from "human-id";
-// TODO: implement automated testing
+// TODO: Implement automated testing
 
 class Game {
   constructor(id, color) {
@@ -30,6 +30,7 @@ class Game {
 const wss = new WebSocketServer({
   port: 3001,
   clientTracking: true,
+  host: "0.0.0.0", // TODO: secure
 }); // TODO: Unhardcode
 
 let currentGames = new Map();
@@ -37,7 +38,7 @@ let currentGames = new Map();
 const httpServer = createServer((req, res) => {
   res.writeHead(200, {
     "Content-Type": "text/plain",
-    "Access-Control-Allow-Origin": "http://localhost:5173",
+    "Access-Control-Allow-Origin": "*", // TODO: Implement CORS properly and securely
   });
   const gameId = humanId({
     separator: "-",
