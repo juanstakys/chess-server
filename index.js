@@ -5,12 +5,24 @@ import { humanId } from "human-id";
 // TODO: implement automated testing
 
 class Game {
-  constructor(id) {
+  constructor(id, color) {
+    console.log("Creating game with P1 being", color);
     this.id = id;
     this.chess = new Chess();
     this.hasStarted = false;
     this.players = [];
-    this.white = Math.random() > 0.5; // Determines if white is the 0th o 1st player in .players
+    switch (
+      color // Determines the index of the white player in .players
+    ) {
+      case "white":
+        this.white = 0;
+        break;
+      case "black":
+        this.white = 1;
+        break;
+      default:
+        this.white = Math.random() > 0.5;
+    }
     this.turn = this.white;
   }
 }
@@ -31,7 +43,8 @@ const httpServer = createServer((req, res) => {
     separator: "-",
     capitalize: false,
   });
-  const game = new Game(gameId);
+  const firstPlayerColor = req.url.substring(1);
+  const game = new Game(gameId, firstPlayerColor);
   currentGames.set(gameId, game);
   console.log("Created game ID: " + gameId);
   res.end(gameId);
