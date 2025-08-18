@@ -72,8 +72,15 @@ wss.on("connection", (ws) => {
       try {
         game.chess.move(move); // TODO: make this whole step atomic.
         const nextTurn = (game.turn + 1) % 2;
-        game.players[nextTurn].send(move);
         game.turn = nextTurn;
+        game.players[nextTurn].send(move);
+        if (game.chess.isGameOver()) {
+          console.log("Game over");
+          game.players.forEach((player) => {
+            player.send("Game over");
+            player.close();
+          });
+        }
       } catch (err) {
         console.error(err);
       }
