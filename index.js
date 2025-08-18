@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { WebSocketServer } from "ws";
 import { Chess } from "chess.js";
-import { v6 as uuidv6 } from "uuid";
+import { humanId } from "human-id";
 // TODO: implement automated testing
 
 class Game {
@@ -27,7 +27,10 @@ const httpServer = createServer((req, res) => {
     "Content-Type": "text/plain",
     "Access-Control-Allow-Origin": "http://localhost:5173",
   });
-  const gameId = uuidv6();
+  const gameId = humanId({
+    separator: "-",
+    capitalize: false,
+  });
   const game = new Game(gameId);
   currentGames.set(gameId, game);
   console.log("Created game ID: " + gameId);
