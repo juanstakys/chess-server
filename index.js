@@ -57,7 +57,7 @@ wss.on("connection", (ws) => {
   ws.on("message", (data) => {
     console.log("Received:");
     console.log(data.toString("utf-8"));
-    const [gameId, command, move] = data.toString("utf-8").split(" ");
+    const [gameId, command, move] = data.toString("utf-8").split(" "); // TODO: Generalize message parsing
     if (!gameId || !command) {
       console.error("Invalid message format");
       ws.send("Error: Invalid message format");
@@ -80,10 +80,17 @@ wss.on("connection", (ws) => {
     if (command === "move" && game.players.includes(ws)) {
       if (game.turn != game.players.indexOf(ws)) {
         console.error("Not your turn");
-        console.log("game.turn:", game.turn);
-        console.log("game.white:", game.white);
-        console.log("game.players.indexOf(ws):", game.players.indexOf(ws));
         ws.send("Error: Not your turn");
+        return;
+      }
+      if (game.players.length !== 2) {
+        console.error("Waiting for second player to join");
+        ws.send("Error: Waiting for second player to join");
+        return;
+      }
+      if (!move) {
+        console.error("No move specified");
+        ws.send("Error: No move specified");
         return;
       }
       try {
@@ -91,6 +98,8 @@ wss.on("connection", (ws) => {
         const nextTurn = (game.turn + 1) % 2;
         game.turn = nextTurn;
         game.players[nextTurn].send(move);
+        // DEBUG
+        console.log(game.chess.ascii());
         if (game.chess.isGameOver()) {
           console.log("Game over");
           game.players.forEach((player) => {
