@@ -101,9 +101,15 @@ wss.on("connection", (ws) => {
         // DEBUG
         console.log(game.chess.ascii());
         if (game.chess.isGameOver()) {
-          console.log("Game over");
+          let message = game.chess.isStalemate()
+            ? "Stalemate"
+            : game.chess.isThreefoldRepetition()
+              ? "Threefold Repetition"
+              : game.chess.isCheckmate()
+                ? `${game.chess.turn() == "w" ? "White" : "Black"} checkmated!`
+                : "Draw";
           game.players.forEach((player) => {
-            player.send("Game over");
+            player.send("Game over: " + message);
             player.close();
           });
         }
