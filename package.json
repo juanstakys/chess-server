@@ -23,9 +23,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "chess.js": "^1.4.0",
-    "express": "^5.1.0",
-    "human-id": "^4.1.1",
-    "ws": "^8.18.3"
+    "chess.js": "1.4.0",
+    "express": "5.1.0",
+    "human-id": "4.1.1",
+    "ws": "8.18.3"
   }
 }
