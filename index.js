@@ -28,7 +28,7 @@ class Game {
 }
 
 const wss = new WebSocketServer({
-  port: 3001,
+  noServer: true,
   clientTracking: true,
   host: "0.0.0.0", // TODO: secure
 }); // TODO: Unhardcode
@@ -49,6 +49,16 @@ const httpServer = createServer((req, res) => {
   currentGames.set(gameId, game);
   console.log("Created game ID: " + gameId);
   res.end(gameId);
+});
+
+httpServer.on("upgrade", (request, socket, head) => {
+  if (request.headers["upgrade"] === "websocket") {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+  } else {
+    socket.destroy();
+  }
 });
 
 wss.on("connection", (ws) => {
